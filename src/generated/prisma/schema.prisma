@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+generator studioClient {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// client usado só pelo Prisma Studio
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(AGENT)
+  requests     Request[] @relation("opened")
+}
+
+model Request {
+  id         Int        @id @default(autoincrement())
+  title      String
+  details    String
+  status     Status     @default(NEW)
+  priority   Priority   @default(MEDIUM)
+  openedById Int
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  dueAt      DateTime? // Campo opcional para data de prazo (SLA)
+  auditLogs  AuditLog[]
+  openedBy   User       @relation("opened", fields: [openedById], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  requestId Int
+  oldStatus Status
+  newStatus Status
+  changedBy Int
+  changedAt DateTime @default(now())
+  request   Request  @relation(fields: [requestId], references: [id])
+}
+
+/// -------- Enums ----------
+enum Status {
+  NEW
+  IN_PROGRESS
+  WAITING_INFO
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  VIEWER
+}
