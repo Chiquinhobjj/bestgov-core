@@ -1,0 +1,7 @@
+/* Versão curta para Tailwind v4 */
+@import "tailwindcss";
+
+/* Versão detalhada para compatibilidade máxima */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
